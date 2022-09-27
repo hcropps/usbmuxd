@@ -53,9 +53,20 @@
 #include "client.h"
 #include "conf.h"
 
-static const char *socket_path = "/var/run/usbmuxd";
 #define DEFAULT_LOCKFILE "/var/run/usbmuxd.pid"
+
+#ifdef __ANDROID__
+static const char *socket_path = "/data/local/tmp/usbmuxd";
+#else
+static const char *socket_path = "/var/run/usbmuxd";
+#endif
+
+#ifdef __ANDROID__
+static const char *socket_path = "/data/local/tmp/usbmuxd.pid";
+#else
 static const char *lockfile = DEFAULT_LOCKFILE;
+#endif
+
 
 // Global state used in other files
 int should_exit;
@@ -211,15 +222,34 @@ static int create_socket(void)
 			return -1;
 		}
 
+		
+		
+		#ifdef __ANDROID__
+		listenfd = socket(AF_INET, SOCK_STREAM, 0);
+		#else
 		listenfd = socket(AF_UNIX, SOCK_STREAM, 0);
+		#endif
+		
+		
 		if (listenfd == -1) {
 			usbmuxd_log(LL_FATAL, "socket() failed: %s", strerror(errno));
 			return -1;
 		}
 
 		bzero(&bind_addr, sizeof(bind_addr));
+		
+		
+		#ifdef __ANDROID__
+		bind_addr.sin_family = AF_INET;
+		bind_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+		bind_addr.sin_port = htons(USBMUXD_SOCKET_PORT);
+		#else
 		bind_addr.sun_family = AF_UNIX;
 		strncpy(bind_addr.sun_path, socket_addr, sizeof(bind_addr.sun_path));
+		#endif
+		
+		
+		
 		bind_addr.sun_path[sizeof(bind_addr.sun_path) - 1] = '\0';
 
 		if (bind(listenfd, (struct sockaddr*)&bind_addr, sizeof(bind_addr)) != 0) {
