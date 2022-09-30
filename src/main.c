@@ -53,7 +53,12 @@
 #include "client.h"
 #include "conf.h"
 
+#include <android/log.h>
+
 #define DEFAULT_LOCKFILE "/var/run/usbmuxd.pid"
+
+#define logAnd(...) __android_log_print(ANDROID_LOG_INFO, "libusb-usbmuxd", __VA_ARGS__)
+
 
 #ifdef __ANDROID__
 //static const char *socket_path = "/data/local/tmp/usbmuxd";
@@ -123,6 +128,9 @@ static int create_socket(void)
 		free(hostname);
 		if (res != 0) {
 			usbmuxd_log(LL_FATAL, "%s: getaddrinfo() failed: %s\n", __func__, gai_strerror(res));
+			
+			logAnd(LL_FATAL, "%s: getaddrinfo() failed: %s\n", __func__, gai_strerror(res));
+			
 			return -1;
 		}
 
@@ -135,6 +143,9 @@ static int create_socket(void)
 
 			if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (void*)&yes, sizeof(int)) == -1) {
 				usbmuxd_log(LL_ERROR, "%s: setsockopt(): %s", __func__, strerror(errno));
+				
+				logAnd(LL_ERROR, "%s: setsockopt(): %s", __func__, strerror(errno));
+				
 				close(listenfd);
 				listenfd = -1;
 				continue;
@@ -143,6 +154,9 @@ static int create_socket(void)
 #ifdef SO_NOSIGPIPE
 			if (setsockopt(listenfd, SOL_SOCKET, SO_NOSIGPIPE, (void*)&yes, sizeof(int)) == -1) {
 				usbmuxd_log(LL_ERROR, "%s: setsockopt(): %s", __func__, strerror(errno));
+				
+				logAnd(LL_ERROR, "%s: setsockopt(): %s", __func__, strerror(errno));
+				
 				close(listenfd);
 				listenfd = -1;
 				continue;
@@ -153,12 +167,14 @@ static int create_socket(void)
 			if (rp->ai_family == AF_INET6) {
 				if (setsockopt(listenfd, IPPROTO_IPV6, IPV6_V6ONLY, (void*)&yes, sizeof(int)) == -1) {
 					usbmuxd_log(LL_ERROR, "%s: setsockopt() IPV6_V6ONLY: %s", __func__, strerror(errno));
+					logAnd(LL_ERROR, "%s: setsockopt() IPV6_V6ONLY: %s", __func__, strerror(errno));
 				}
 			}
 #endif
 
 			if (bind(listenfd, rp->ai_addr, rp->ai_addrlen) < 0) {
 				usbmuxd_log(LL_FATAL, "%s: bind() failed: %s", __func__, strerror(errno));
+				logAnd(LL_FATAL, "%s: bind() failed: %s", __func__, strerror(errno));
 				close(listenfd);
 				listenfd = -1;
 				continue;
@@ -204,6 +220,7 @@ static int create_socket(void)
 		freeaddrinfo(result);
 		if (listenfd == -1) {
 			usbmuxd_log(LL_FATAL, "%s: Failed to create listening socket", __func__);
+			logAnd(LL_FATAL, "%s: Failed to create listening socket", __func__);
 			return -1;
 		}
 	} else {
@@ -214,6 +231,7 @@ static int create_socket(void)
 			if (stat(socket_addr, &fst) == 0) {
 				if (!S_ISSOCK(fst.st_mode)) {
 					usbmuxd_log(LL_FATAL, "FATAL: File '%s' already exists and is not a socket file. Refusing to continue.", socket_addr);
+					logAnd(LL_FATAL, "FATAL: File '%s' already exists and is not a socket file. Refusing to continue.", socket_addr);
 					return -1;
 				}
 			}
@@ -221,6 +239,7 @@ static int create_socket(void)
 
 		if (unlink(socket_addr) == -1 && errno != ENOENT) {
 			usbmuxd_log(LL_FATAL, "%s: unlink(%s) failed: %s", __func__, socket_addr, strerror(errno));
+			logAnd(LL_FATAL, "%s: unlink(%s) failed: %s", __func__, socket_addr, strerror(errno));
 			return -1;
 		}
 
@@ -236,6 +255,7 @@ static int create_socket(void)
 		
 		if (listenfd == -1) {
 			usbmuxd_log(LL_FATAL, "socket() failed: %s", strerror(errno));
+			logAnd(LL_FATAL, "socket() failed: %s", strerror(errno));
 			return -1;
 		}
 
@@ -260,6 +280,7 @@ static int create_socket(void)
 
 		if (bind(listenfd, (struct sockaddr*)&bind_addr, sizeof(bind_addr)) != 0) {
 			usbmuxd_log(LL_FATAL, "bind() failed: %s", strerror(errno));
+			logAnd(LL_FATAL, "bind() failed: %s", strerror(errno));
 			return -1;
 		}
 		chmod(socket_addr, 0666);
@@ -270,19 +291,23 @@ static int create_socket(void)
 	int flags = fcntl(listenfd, F_GETFL, 0);
 	if (flags < 0) {
 		usbmuxd_log(LL_FATAL, "ERROR: Could not get flags for socket");
+		logAnd(LL_FATAL, "ERROR: Could not get flags for socket");
 	} else {
 		if (fcntl(listenfd, F_SETFL, flags | O_NONBLOCK) < 0) {
 			usbmuxd_log(LL_FATAL, "ERROR: Could not set socket to non-blocking");
+			logAnd(LL_FATAL, "ERROR: Could not set socket to non-blocking");
 		}
 	}
 
 	// Start listening
 	if (listen(listenfd, 256) != 0) {
 		usbmuxd_log(LL_FATAL, "listen() failed: %s", strerror(errno));
+		logAnd(LL_FATAL, "listen() failed: %s", strerror(errno));
 		return -1;
 	}
 
 	usbmuxd_log(LL_INFO, "Listening on %s", listen_addr_str);
+	logAnd(LL_INFO, "Listening on %s", listen_addr_str);
 
 	return listenfd;
 }
@@ -291,24 +316,29 @@ static void handle_signal(int sig)
 {
 	if (sig != SIGUSR1 && sig != SIGUSR2) {
 		usbmuxd_log(LL_NOTICE,"Caught signal %d, exiting", sig);
+		logAnd(LL_NOTICE,"Caught signal %d, exiting", sig);
 		should_exit = 1;
 	} else {
 		if(opt_enable_exit) {
 			if (sig == SIGUSR1) {
 				usbmuxd_log(LL_INFO, "Caught SIGUSR1, checking if we can terminate (no more devices attached)...");
+				logAnd(LL_INFO, "Caught SIGUSR1, checking if we can terminate (no more devices attached)...");
 				if (device_get_count(1) > 0) {
 					// we can't quit, there are still devices attached.
 					usbmuxd_log(LL_NOTICE, "Refusing to terminate, there are still devices attached. Kill me with signal 15 (TERM) to force quit.");
+					logAnd(LL_NOTICE, "Refusing to terminate, there are still devices attached. Kill me with signal 15 (TERM) to force quit.");
 				} else {
 					// it's safe to quit
 					should_exit = 1;
 				}
 			} else if (sig == SIGUSR2) {
 				usbmuxd_log(LL_INFO, "Caught SIGUSR2, scheduling device discovery");
+				logAnd(LL_INFO, "Caught SIGUSR2, scheduling device discovery");
 				should_discover = 1;
 			}
 		} else {
 			usbmuxd_log(LL_INFO, "Caught SIGUSR1/2 but this instance was not started with \"--enable-exit\", ignoring.");
+			logAnd(LL_INFO, "Caught SIGUSR1/2 but this instance was not started with \"--enable-exit\", ignoring.");
 		}
 	}
 }
@@ -363,10 +393,13 @@ static int main_loop(int listenfd)
 	fdlist_create(&pollfds);
 	while(!should_exit) {
 		usbmuxd_log(LL_FLOOD, "main_loop iteration");
+		logAnd(LL_FLOOD, "main_loop iteration");
 		to = usb_get_timeout();
 		usbmuxd_log(LL_FLOOD, "USB timeout is %d ms", to);
+		logAnd(LL_FLOOD, "USB timeout is %d ms", to);
 		dto = device_get_timeout();
 		usbmuxd_log(LL_FLOOD, "Device timeout is %d ms", dto);
+		logAnd(LL_FLOOD, "Device timeout is %d ms", dto);
 		if(dto < to)
 			to = dto;
 
@@ -375,26 +408,31 @@ static int main_loop(int listenfd)
 		usb_get_fds(&pollfds);
 		client_get_fds(&pollfds);
 		usbmuxd_log(LL_FLOOD, "fd count is %d", pollfds.count);
+		logAnd(LL_FLOOD, "fd count is %d", pollfds.count);
 
 		tspec.tv_sec = to / 1000;
 		tspec.tv_nsec = (to % 1000) * 1000000;
 		cnt = ppoll(pollfds.fds, pollfds.count, &tspec, &empty_sigset);
 		usbmuxd_log(LL_FLOOD, "poll() returned %d", cnt);
+		logAnd(LL_FLOOD, "poll() returned %d", cnt);
 		if(cnt == -1) {
 			if(errno == EINTR) {
 				if(should_exit) {
 					usbmuxd_log(LL_INFO, "Event processing interrupted");
+					logAnd(LL_INFO, "Event processing interrupted");
 					break;
 				}
 				if(should_discover) {
 					should_discover = 0;
 					usbmuxd_log(LL_INFO, "Device discovery triggered");
+					logAnd(LL_INFO, "Device discovery triggered");
 					usb_discover();
 				}
 			}
 		} else if(cnt == 0) {
 			if(usb_process() < 0) {
 				usbmuxd_log(LL_FATAL, "usb_process() failed");
+				logAnd(LL_FATAL, "usb_process() failed");
 				fdlist_free(&pollfds);
 				return -1;
 			}
@@ -406,6 +444,7 @@ static int main_loop(int listenfd)
 					if(!done_usb && pollfds.owners[i] == FD_USB) {
 						if(usb_process() < 0) {
 							usbmuxd_log(LL_FATAL, "usb_process() failed");
+							logAnd(LL_FATAL, "usb_process() failed");
 							fdlist_free(&pollfds);
 							return -1;
 						}
@@ -414,6 +453,7 @@ static int main_loop(int listenfd)
 					if(pollfds.owners[i] == FD_LISTEN) {
 						if(client_accept(listenfd) < 0) {
 							usbmuxd_log(LL_FATAL, "client_accept() failed");
+							logAnd(LL_FATAL, "client_accept() failed");
 							fdlist_free(&pollfds);
 							return -1;
 						}
@@ -445,12 +485,14 @@ static int daemonize(void)
 
 	if((res = pipe(pfd)) < 0) {
 		usbmuxd_log(LL_FATAL, "pipe() failed.");
+		logAnd(LL_FATAL, "pipe() failed.");
 		return res;
 	}
 
 	pid = fork();
 	if (pid < 0) {
 		usbmuxd_log(LL_FATAL, "fork() failed.");
+		logAnd(LL_FATAL, "fork() failed.");
 		return pid;
 	}
 
@@ -478,12 +520,14 @@ static int daemonize(void)
 	sid = setsid();
 	if (sid < 0) {
 		usbmuxd_log(LL_FATAL, "setsid() failed.");
+		logAnd(LL_FATAL, "setsid() failed.");
 		return -1;
 	}
 
 	pid = fork();
 	if (pid < 0) {
 		usbmuxd_log(LL_FATAL, "fork() failed (second).");
+		logAnd(LL_FATAL, "fork() failed (second).");
 		return pid;
 	}
 
@@ -496,15 +540,18 @@ static int daemonize(void)
 	// Change the current working directory.
 	if ((chdir("/")) < 0) {
 		usbmuxd_log(LL_FATAL, "chdir() failed");
+		logAnd(LL_FATAL, "chdir() failed");
 		return -2;
 	}
 	// Redirect standard files to /dev/null
 	if (!freopen("/dev/null", "r", stdin)) {
 		usbmuxd_log(LL_FATAL, "Redirection of stdin failed.");
+		logAnd(LL_FATAL, "Redirection of stdin failed.");
 		return -3;
 	}
 	if (!freopen("/dev/null", "w", stdout)) {
 		usbmuxd_log(LL_FATAL, "Redirection of stdout failed.");
+		logAnd(LL_FATAL, "Redirection of stdout failed.");
 		return -3;
 	}
 
@@ -518,6 +565,7 @@ static int notify_parent(int status)
 	report_to_parent = 0;
 	if ((res = write(daemon_pipe, &status, sizeof(int))) != sizeof(int)) {
 		usbmuxd_log(LL_FATAL, "Could not notify parent!");
+		logAnd(LL_FATAL, "Could not notify parent!");
 		if(res >= 0)
 			return -2;
 		else
@@ -526,6 +574,7 @@ static int notify_parent(int status)
 	close(daemon_pipe);
 	if (!freopen("/dev/null", "w", stderr)) {
 		usbmuxd_log(LL_FATAL, "Redirection of stderr failed.");
+		logAnd(LL_FATAL, "Redirection of stderr failed.");
 		return -1;
 	}
 	return 0;
@@ -650,6 +699,7 @@ static void parse_opts(int argc, char **argv)
 		case 'S':
 			if (!*optarg || *optarg == '-') {
 				usbmuxd_log(LL_FATAL, "ERROR: --socket requires an argument");
+				logAnd(LL_FATAL, "ERROR: --socket requires an argument");
 				usage();
 				exit(2);
 			}
@@ -658,6 +708,7 @@ static void parse_opts(int argc, char **argv)
 		case 'P':
 			if (!*optarg || *optarg == '-') {
 				usbmuxd_log(LL_FATAL, "ERROR: --pidfile requires an argument");
+				logAnd(LL_FATAL, "ERROR: --pidfile requires an argument");
 				usage();
 				exit(2);
 			}
@@ -678,15 +729,18 @@ static void parse_opts(int argc, char **argv)
 		case 'l':
 			if (!*optarg) {
 				usbmuxd_log(LL_FATAL, "ERROR: --logfile requires a non-empty filename");
+				logAnd(LL_FATAL, "ERROR: --logfile requires a non-empty filename");
 				usage();
 				exit(2);
 			}
 			if (use_logfile) {
 				usbmuxd_log(LL_FATAL, "ERROR: --logfile cannot be used multiple times");
+				logAnd(LL_FATAL, "ERROR: --logfile cannot be used multiple times");
 				exit(2);
 			}
 			if (!freopen(optarg, "a", stderr)) {
 				usbmuxd_log(LL_FATAL, "ERROR: fdreopen: %s", strerror(errno));
+				logAnd(LL_FATAL, "ERROR: fdreopen: %s", strerror(errno));
 			} else {
 				use_logfile = 1;
 			}
@@ -721,7 +775,7 @@ int main(int argc, char *argv[])
 	/* set log level to specified verbosity */
 	log_level = verbose;
 
-	usbmuxd_log(LL_NOTICE, "usbmuxd v%s starting up", PACKAGE_VERSION);
+	//usbmuxd_log(LL_NOTICE, "usbmuxd v%s starting up", PACKAGE_VERSION);
 	should_exit = 0;
 	should_discover = 0;
 
@@ -732,6 +786,7 @@ int main(int argc, char *argv[])
 		res = lfd = open(lockfile, O_WRONLY|O_CREAT, 0644);
 		if(res == -1) {
 			usbmuxd_log(LL_FATAL, "Could not open lockfile");
+			logAnd(LL_FATAL, "Could not open lockfile");
 			goto terminate;
 		}
 		lock.l_type = F_WRLCK;
@@ -746,32 +801,40 @@ int main(int argc, char *argv[])
 		if (opt_exit) {
 			if (lock.l_pid && !kill(lock.l_pid, 0)) {
 				usbmuxd_log(LL_NOTICE, "Sending signal %d to instance with pid %d", exit_signal, lock.l_pid);
+				logAnd(LL_NOTICE, "Sending signal %d to instance with pid %d", exit_signal, lock.l_pid);
 				res = 0;
 				if (kill(lock.l_pid, exit_signal) < 0) {
 					usbmuxd_log(LL_FATAL, "Could not deliver signal %d to pid %d", exit_signal, lock.l_pid);
+					logAnd(LL_FATAL, "Could not deliver signal %d to pid %d", exit_signal, lock.l_pid);
 					res = -1;
 				}
 				goto terminate;
 			} else {
 				usbmuxd_log(LL_ERROR, "Could not determine pid of the other running instance!");
+				logAnd(LL_ERROR, "Could not determine pid of the other running instance!");
 				res = -1;
 				goto terminate;
 			}
 		} else {
 			if (!opt_disable_hotplug) {
 				usbmuxd_log(LL_ERROR, "Another instance is already running (pid %d). exiting.", lock.l_pid);
+				logAnd(LL_ERROR, "Another instance is already running (pid %d). exiting.", lock.l_pid);
 				res = -1;
 			} else {
 				usbmuxd_log(LL_NOTICE, "Another instance is already running (pid %d). Telling it to check for devices.", lock.l_pid);
+				logAnd(LL_NOTICE, "Another instance is already running (pid %d). Telling it to check for devices.", lock.l_pid);
 				if (lock.l_pid && !kill(lock.l_pid, 0)) {
 					usbmuxd_log(LL_NOTICE, "Sending signal SIGUSR2 to instance with pid %d", lock.l_pid);
+					logAnd(LL_NOTICE, "Sending signal SIGUSR2 to instance with pid %d", lock.l_pid);
 					res = 0;
 					if (kill(lock.l_pid, SIGUSR2) < 0) {
 						usbmuxd_log(LL_FATAL, "Could not deliver SIGUSR2 to pid %d", lock.l_pid);
+						logAnd(LL_FATAL, "Could not deliver SIGUSR2 to pid %d", lock.l_pid);
 						res = -1;
 					}
 				} else {
 					usbmuxd_log(LL_ERROR, "Could not determine pid of the other running instance!");
+					logAnd(LL_ERROR, "Could not determine pid of the other running instance!");
 					res = -1;
 				}
 			}
@@ -784,6 +847,7 @@ int main(int argc, char *argv[])
 
 	if (opt_exit) {
 		usbmuxd_log(LL_NOTICE, "No running instance found, none killed. Exiting.");
+		logAnd(LL_NOTICE, "No running instance found, none killed. Exiting.");
 		goto terminate;
 	}
 
@@ -791,6 +855,7 @@ int main(int argc, char *argv[])
 		if ((res = daemonize()) < 0) {
 			fprintf(stderr, "usbmuxd: FATAL: Could not daemonize!\n");
 			usbmuxd_log(LL_FATAL, "Could not daemonize!");
+			logAnd(LL_FATAL, "Could not daemonize!");
 			goto terminate;
 		}
 	}
@@ -800,6 +865,7 @@ int main(int argc, char *argv[])
 		res = lfd = open(lockfile, O_WRONLY|O_CREAT|O_TRUNC|O_EXCL, 0644);
 		if(res < 0) {
 			usbmuxd_log(LL_FATAL, "Could not open pidfile '%s'", lockfile);
+			logAnd(LL_FATAL, "Could not open pidfile '%s'", lockfile);
 			goto terminate;
 		}
 		lock.l_type = F_WRLCK;
@@ -808,11 +874,13 @@ int main(int argc, char *argv[])
 		lock.l_len = 0;
 		if ((res = fcntl(lfd, F_SETLK, &lock)) < 0) {
 			usbmuxd_log(LL_FATAL, "Locking pidfile '%s' failed!", lockfile);
+			logAnd(LL_FATAL, "Locking pidfile '%s' failed!", lockfile);
 			goto terminate;
 		}
 		sprintf(pids, "%d", getpid());
 		if ((size_t)(res = write(lfd, pids, strlen(pids))) != strlen(pids)) {
 			usbmuxd_log(LL_FATAL, "Could not write pidfile!");
+			logAnd(LL_FATAL, "Could not write pidfile!");
 			if(res >= 0)
 				res = -2;
 			goto terminate;
@@ -826,6 +894,7 @@ int main(int argc, char *argv[])
 	setrlimit(RLIMIT_NOFILE, (const struct rlimit*)&rlim);
 
 	usbmuxd_log(LL_INFO, "Creating socket");
+	logAnd(LL_INFO, "Creating socket");
 	res = listenfd = create_socket();
 	if(listenfd < 0)
 		goto terminate;
@@ -837,11 +906,13 @@ int main(int argc, char *argv[])
 	if (stat(userprefdir, &fst) < 0) {
 		if (mkdir(userprefdir, 0775) < 0) {
 			usbmuxd_log(LL_FATAL, "Failed to create required directory '%s': %s", userprefdir, strerror(errno));
+			logAnd(LL_FATAL, "Failed to create required directory '%s': %s", userprefdir, strerror(errno));
 			res = -1;
 			goto terminate;
 		}
 		if (stat(userprefdir, &fst) < 0) {
 			usbmuxd_log(LL_FATAL, "stat() failed after creating directory '%s': %s", userprefdir, strerror(errno));
+			logAnd(LL_FATAL, "stat() failed after creating directory '%s': %s", userprefdir, strerror(errno));
 			res = -1;
 			goto terminate;
 		}
@@ -851,6 +922,7 @@ int main(int argc, char *argv[])
 	if (fst.st_mode != 02775) {
 		if (chmod(userprefdir, 02775) < 0) {
 			usbmuxd_log(LL_WARNING, "chmod(%s, 02775) failed: %s", userprefdir, strerror(errno));
+			logAnd(LL_WARNING, "chmod(%s, 02775) failed: %s", userprefdir, strerror(errno));
 		}
 	}
 #endif
@@ -860,64 +932,77 @@ int main(int argc, char *argv[])
 		struct passwd *pw;
 		if (!drop_user) {
 			usbmuxd_log(LL_FATAL, "No user to drop privileges to?");
+			logAnd(LL_FATAL, "No user to drop privileges to?");
 			res = -1;
 			goto terminate;
 		}
 		pw = getpwnam(drop_user);
 		if (!pw) {
 			usbmuxd_log(LL_FATAL, "Dropping privileges failed, check if user '%s' exists!", drop_user);
+			logAnd(LL_FATAL, "Dropping privileges failed, check if user '%s' exists!", drop_user);
 			res = -1;
 			goto terminate;
 		}
 		if (pw->pw_uid == 0) {
 			usbmuxd_log(LL_INFO, "Not dropping privileges to root");
+			logAnd(LL_INFO, "Not dropping privileges to root");
 		} else {
 #ifdef HAVE_LIBIMOBILEDEVICE
 			/* make sure the non-privileged user has proper access to the config directory */
 			if ((fst.st_uid != pw->pw_uid) || (fst.st_gid != pw->pw_gid)) {
 				if (chown(userprefdir, pw->pw_uid, pw->pw_gid) < 0) {
 					usbmuxd_log(LL_WARNING, "chown(%s, %d, %d) failed: %s", userprefdir, pw->pw_uid, pw->pw_gid, strerror(errno));
+					logAnd(LL_WARNING, "chown(%s, %d, %d) failed: %s", userprefdir, pw->pw_uid, pw->pw_gid, strerror(errno));
 				}
 			}
 #endif
 
 			if ((res = initgroups(drop_user, pw->pw_gid)) < 0) {
 				usbmuxd_log(LL_FATAL, "Failed to drop privileges (cannot set supplementary groups)");
+				logAnd(LL_FATAL, "Failed to drop privileges (cannot set supplementary groups)");
 				goto terminate;
 			}
 			if ((res = setgid(pw->pw_gid)) < 0) {
 				usbmuxd_log(LL_FATAL, "Failed to drop privileges (cannot set group ID to %d)", pw->pw_gid);
+				logAnd(LL_FATAL, "Failed to drop privileges (cannot set group ID to %d)", pw->pw_gid);
 				goto terminate;
 			}
 			if ((res = setuid(pw->pw_uid)) < 0) {
 				usbmuxd_log(LL_FATAL, "Failed to drop privileges (cannot set user ID to %d)", pw->pw_uid);
+				logAnd(LL_FATAL, "Failed to drop privileges (cannot set user ID to %d)", pw->pw_uid);
 				goto terminate;
 			}
 
 			// security check
 			if (setuid(0) != -1) {
 				usbmuxd_log(LL_FATAL, "Failed to drop privileges properly!");
+				logAnd(LL_FATAL, "Failed to drop privileges properly!");
 				res = -1;
 				goto terminate;
 			}
 			if (getuid() != pw->pw_uid || getgid() != pw->pw_gid) {
 				usbmuxd_log(LL_FATAL, "Failed to drop privileges properly!");
+				logAnd(LL_FATAL, "Failed to drop privileges properly!");
 				res = -1;
 				goto terminate;
 			}
 			usbmuxd_log(LL_NOTICE, "Successfully dropped privileges to '%s'", drop_user);
+			logAnd(LL_NOTICE, "Successfully dropped privileges to '%s'", drop_user);
 		}
 	}
 
 	client_init();
 	device_init();
 	usbmuxd_log(LL_INFO, "Initializing USB");
+	logAnd(LL_INFO, "Initializing USB");
 	if((res = usb_init()) < 0)
 		goto terminate;
 
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
+	logAnd(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
 
 	usbmuxd_log(LL_NOTICE, "Initialization complete");
+	logAnd(LL_NOTICE, "Initialization complete");
 
 	if (report_to_parent)
 		if((res = notify_parent(0)) < 0)
@@ -925,10 +1010,12 @@ int main(int argc, char *argv[])
 
 	if(opt_disable_hotplug) {
 		usbmuxd_log(LL_NOTICE, "Automatic device discovery on hotplug disabled.");
+		logAnd(LL_NOTICE, "Automatic device discovery on hotplug disabled.");
 		usb_autodiscover(0); // discovery to be triggered by new instance
 	}
 	if (opt_enable_exit) {
 		usbmuxd_log(LL_NOTICE, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
+		logAnd(LL_NOTICE, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
 	}
 
 	res = main_loop(listenfd);
@@ -936,11 +1023,13 @@ int main(int argc, char *argv[])
 		usbmuxd_log(LL_FATAL, "main_loop failed");
 
 	usbmuxd_log(LL_NOTICE, "usbmuxd shutting down");
+	logAnd(LL_NOTICE, "usbmuxd shutting down");
 	device_kill_connections();
 	usb_shutdown();
 	device_shutdown();
 	client_shutdown();
 	usbmuxd_log(LL_NOTICE, "Shutdown complete");
+	logAnd(LL_NOTICE, "Shutdown complete");
 
 terminate:
 	log_disable_syslog();
