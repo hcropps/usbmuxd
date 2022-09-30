@@ -740,7 +740,7 @@ static void parse_opts(int argc, char **argv)
 			}
 			if (!freopen(optarg, "a", stderr)) {
 				usbmuxd_log(LL_FATAL, "ERROR: fdreopen: %s", strerror(errno));
-				logAnd(LL_FATAL, "ERROR: fdreopen: %s", strerror(errno));
+				logAnd(LL_FATAL, "ERROR: fdreopen: %s");
 			} else {
 				use_logfile = 1;
 			}
@@ -776,6 +776,7 @@ int main(int argc, char *argv[])
 	log_level = verbose;
 
 	//usbmuxd_log(LL_NOTICE, "usbmuxd v%s starting up", PACKAGE_VERSION);
+	logAnd(LL_NOTICE, "usbmuxd v%s starting up");
 	should_exit = 0;
 	should_discover = 0;
 
