@@ -33,6 +33,9 @@
 #include "log.h"
 #include "utils.h"
 
+#include <android/log.h>
+#define logAnd(...) __android_log_print(ANDROID_LOG_INFO, "libusb-usbmuxd", __VA_ARGS__)
+
 unsigned int log_level = LL_WARNING;
 
 int log_syslog = 0;
@@ -73,6 +76,7 @@ void usbmuxd_log(enum loglevel level, const char *fmt, ...)
 
 	if(log_syslog) {
 		sprintf(fs, "[%d] %s\n", level, fmt);
+		logAnd("[%d] %s\n", level, fmt);
 	} else {
 		struct timeval ts;
 		struct tm tp_;
@@ -87,6 +91,7 @@ void usbmuxd_log(enum loglevel level, const char *fmt, ...)
 
 		strftime(fs, 10, "[%H:%M:%S", tp);
 		sprintf(fs+9, ".%03d][%d] %s\n", (int)(ts.tv_usec / 1000), level, fmt);
+		logAnd("else [%d] %s\n", level, fmt);
 	}
 
 	va_start(ap, fmt);
