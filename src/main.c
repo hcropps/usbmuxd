@@ -224,7 +224,11 @@ static int create_socket(void)
 			return -1;
 		}
 	} else {
-		struct sockaddr_un bind_addr;
+		#ifdef __ANDROID__
+			struct sockaddr_in bind_addr;
+		#else
+			struct sockaddr_un bind_addr;
+		#endif
 
 		if (strcmp(socket_addr, socket_path) != 0) {
 			struct stat fst;
@@ -275,8 +279,12 @@ static int create_socket(void)
 		//bind_addr.sun_family = AF_UNIX;
 		//strncpy(bind_addr.sun_path, socket_addr, sizeof(bind_addr.sun_path));
 		
+		#ifdef __ANDROID__
+			bind_addr.sin_path[sizeof(bind_addr.sin_path) - 1] = '\0';
+		#else
+			bind_addr.sun_path[sizeof(bind_addr.sun_path) - 1] = '\0';
+		#endif
 		
-		bind_addr.sun_path[sizeof(bind_addr.sun_path) - 1] = '\0';
 
 		if (bind(listenfd, (struct sockaddr*)&bind_addr, sizeof(bind_addr)) != 0) {
 			usbmuxd_log(LL_FATAL, "bind() failed: %s", strerror(errno));
