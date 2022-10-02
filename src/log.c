@@ -66,6 +66,9 @@ static int level_to_syslog_level(int level)
 
 void usbmuxd_log(enum loglevel level, const char *fmt, ...)
 {
+	
+	logAnd("usbmuxd_log %s", "1111");
+	
 	va_list ap;
 	char *fs;
 
