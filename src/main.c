@@ -62,14 +62,14 @@
 
 #ifdef __ANDROID__
 //static const char *socket_path = "/data/local/tmp/usbmuxd";
-static const char *socket_path = "/data/data/com.mtn.move.to.ios.watransfer/files/run/usbmuxd";
+static const char *socket_path = "/data/local/tmp/usbmuxd";
 #else
 static const char *socket_path = "/var/run/usbmuxd";
 #endif
 
 #ifdef __ANDROID__
 //static const char *socket_path = "/data/local/tmp/usbmuxd.pid";
-static const char *lockfile = "/data/data/com.mtn.move.to.ios.watransfer/files/run/usbmuxd.pid";
+static const char *lockfile = "/data/local/tmp/usbmuxd.pid";
 #else
 static const char *lockfile = DEFAULT_LOCKFILE;
 #endif
