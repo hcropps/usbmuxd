@@ -27,9 +27,9 @@
 
 #include <sys/time.h>
 #include <netinet/in.h>
-//#include <netinet/tcp.h>
+#include <netinet/tcp.h>
 #define __USE_MISC
-#include "tcp.h"
+//#include "tcp.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
