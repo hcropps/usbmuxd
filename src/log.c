@@ -34,7 +34,7 @@
 #include "utils.h"
 
 #include <android/log.h>
-#define logAnd(format, ...) __android_log_print(ANDROID_LOG_INFO, "libusb-usbmuxd", format, __VA_ARGS__)
+#define logAnd( ...) __android_log_print(ANDROID_LOG_INFO, "libusb-usbmuxd",  __VA_ARGS__)
 
 unsigned int log_level = LL_WARNING;
 
