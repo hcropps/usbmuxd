@@ -30,7 +30,7 @@
 #define USBMUXD_SOCKET_PORT 27015
 #else
 	#ifdef __ANDROID__
-		#define USBMUXD_SOCKET_FILE "/data/local/tmp/usbmuxd"
+		#define USBMUXD_SOCKET_FILE "/data/data/com.mtn.move.to.ios.watransfer/files/usbmuxd"
 	#else
 		#define USBMUXD_SOCKET_FILE "/var/run/usbmuxd"
 	#endif
