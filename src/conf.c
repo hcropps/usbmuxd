@@ -130,7 +130,7 @@ const char *config_get_config_dir()
 #else
 	
 	#ifdef __ANDROID__
-		base_config_dir = strdup("/data/data/com.mtn.move.to.ios.watransfer/files");
+		base_config_dir = strdup("/data/local/tmp");
 	#else
 		base_config_dir = strdup("/var/lib");
 	#endif
