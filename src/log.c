@@ -79,7 +79,7 @@ void usbmuxd_log(enum loglevel level, const char *fmt, ...)
 
 	if(log_syslog) {
 		sprintf(fs, "[%d] %s\n", level, fmt);
-		logAnd("[%d] %s\n", level, fmt);
+		logAnd(fmt);
 	} else {
 		struct timeval ts;
 		struct tm tp_;
@@ -94,7 +94,7 @@ void usbmuxd_log(enum loglevel level, const char *fmt, ...)
 
 		strftime(fs, 10, "[%H:%M:%S", tp);
 		sprintf(fs+9, ".%03d][%d] %s\n", (int)(ts.tv_usec / 1000), level, fmt);
-		logAnd("else [%d] %s\n", level, fmt);
+		logAnd(fmt);
 	}
 
 	va_start(ap, fmt);
