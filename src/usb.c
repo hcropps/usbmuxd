@@ -821,6 +821,69 @@ static int usb_hotplug_cb(libusb_context *ctx, libusb_device *device, libusb_hot
 }
 #endif
 
+int usb_init_android(int fileDescriptor)
+{
+	int res;
+	const struct libusb_version* libusb_version_info = libusb_get_version();
+	usbmuxd_log(LL_NOTICE, "Using libusb %d.%d.%d", libusb_version_info->major, libusb_version_info->minor, libusb_version_info->micro);
+
+	devlist_failures = 0;
+	device_polling = 1;
+	
+	libusb_context *ctx = NULL;
+	    libusb_device_handle *devh = NULL;
+	    int r = 0;
+	     = 1;
+	    r = libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	    if (r != LIBUSB_SUCCESS) {
+		usbmuxd_log(LL_NOTICE, "libusb_set_option failed: %d\n", r);
+		return -1;
+	    }
+	    r = libusb_init(&ctx);
+	    if (r < 0) {
+		usbmuxd_log(LL_NOTICE, "libusb_init failed: %d\n", r);
+		return r;
+	    }
+	    r = libusb_wrap_sys_device(ctx, (intptr_t)fileDescriptor, &devh);
+	    if (r < 0) {
+		usbmuxd_log(LL_NOTICE, "libusb_wrap_sys_device failed: %d\n", r);
+		return r;
+	    } else if (devh == NULL) {
+		 usbmuxd_log(LL_NOTICE, "libusb_wrap_sys_device returned invalid handle\n");
+		return r;
+	    }
+
+#if LIBUSB_API_VERSION >= 0x01000106
+	libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, (log_level >= LL_DEBUG ? LIBUSB_LOG_LEVEL_DEBUG: (log_level >= LL_WARNING ? LIBUSB_LOG_LEVEL_WARNING: LIBUSB_LOG_LEVEL_NONE)));
+#else
+	libusb_set_debug(NULL, (log_level >= LL_DEBUG ? LIBUSB_LOG_LEVEL_DEBUG: (log_level >= LL_WARNING ? LIBUSB_LOG_LEVEL_WARNING: LIBUSB_LOG_LEVEL_NONE)));
+#endif
+
+	collection_init(&device_list);
+
+#ifdef HAVE_LIBUSB_HOTPLUG_API
+	if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
+		usbmuxd_log(LL_INFO, "Registering for libusb hotplug events");
+		res = libusb_hotplug_register_callback(NULL, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, LIBUSB_HOTPLUG_ENUMERATE, VID_APPLE, LIBUSB_HOTPLUG_MATCH_ANY, 0, usb_hotplug_cb, NULL, &usb_hotplug_cb_handle);
+		if (res == LIBUSB_SUCCESS) {
+			device_polling = 0;
+		} else {
+			usbmuxd_log(LL_ERROR, "ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
+		}
+	} else {
+		usbmuxd_log(LL_ERROR, "libusb does not support hotplug events");
+	}
+#endif
+	if (device_polling) {
+		res = usb_discover();
+		if (res >= 0) {
+		}
+	} else {
+		res = collection_count(&device_list);
+	}
+	return res;
+}
+
 int usb_init(void)
 {
 	int res;
@@ -831,8 +894,8 @@ int usb_init(void)
 	device_polling = 1;
 	res = libusb_init(NULL);
 
-	if (res != 0) {
-		usbmuxd_log(LL_FATAL, "libusb_init failed: %s", libusb_error_name(res));
+	if (r != 0) {
+		usbmuxd_log(LL_FATAL, "libusb_init failed: %s", libusb_error_name(r));
 		return -1;
 	}
 
