@@ -677,8 +677,8 @@ static void parse_opts(int argc, char **argv)
 			break;
 		}
 		
-		usbmuxd_log(LL_INFO, "parse_opts params %d", c);
-		usbmuxd_log(LL_INFO, "parse_opts optarg %d", optarg);
+		usbmuxd_log(LL_INFO, "parse_opts params %s", c);
+		usbmuxd_log(LL_INFO, "parse_opts optarg %d", atoi(optarg));
 
 		switch (c) {
 		case 'h':
@@ -688,7 +688,8 @@ static void parse_opts(int argc, char **argv)
 			foreground = 1;
 			break;
 		case 'c':
-			fileDescriptor = optarg;
+			usbmuxd_log(LL_INFO, "parse_opts fileDescriptor %d", atoi(optarg));	
+			fileDescriptor = atoi(optarg);
 			break;		
 		case 'v':
 			++verbose;
