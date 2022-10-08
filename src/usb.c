@@ -826,6 +826,7 @@ int usb_init_android(int fileDescriptor)
 	int res;
 	const struct libusb_version* libusb_version_info = libusb_get_version();
 	usbmuxd_log(LL_NOTICE, "Using libusb %d.%d.%d", libusb_version_info->major, libusb_version_info->minor, libusb_version_info->micro);
+	usbmuxd_log(LL_NOTICE, "Using fileDescriptor %d", fileDescriptor);
 
 	devlist_failures = 0;
 	device_polling = 1;
