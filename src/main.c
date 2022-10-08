@@ -594,6 +594,9 @@ static int notify_parent(int status)
 
 static void usage()
 {
+	
+	usbmuxd_log(LL_NOTICE, "usage %s", "11111");
+	
 	printf("Usage: %s [OPTIONS]\n", PACKAGE_NAME);
 	printf("\n");
 	printf("Expose a socket to multiplex connections from and to iOS devices.\n");
@@ -632,6 +635,9 @@ static void usage()
 
 static void parse_opts(int argc, char **argv)
 {
+	
+	usbmuxd_log(LL_NOTICE, "parse_opts %s", "11111");
+	
 	static struct option longopts[] = {
 		{"help", no_argument, NULL, 'h'},
 		{"foreground", no_argument, NULL, 'f'},
@@ -671,7 +677,7 @@ static void parse_opts(int argc, char **argv)
 			break;
 		}
 		
-		//usbmuxd_log(LL_NOTICE, "parse_opts %s", c);
+		usbmuxd_log(LL_NOTICE, "parse_opts params %d", c);
 
 		switch (c) {
 		case 'h':
@@ -1012,7 +1018,7 @@ int main(int argc, char *argv[])
 
 	client_init();
 	device_init();
-	usbmuxd_log(LL_INFO, "Initializing USB");
+	usbmuxd_log(LL_INFO, "Initializing USB %d",fileDescriptor);
 	
 	//usbmuxd_log(LL_INFO, "Initializing USB 111 %s",argv[2]);
 	//usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
