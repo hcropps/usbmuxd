@@ -785,13 +785,6 @@ static void parse_opts(int argc, char **argv)
 int main(int argc, char *argv[])
 {
 	
-	int iargc;
-	usbmuxd_log(LL_INFO, "argc %d", argc);
-    for(iargc=0;iargc<argc-1;iargc++)
-    {
-	    usbmuxd_log(LL_INFO, "argv %s", argv[iargc]);
-    }
-	
 	int listenfd;
 	int res = 0;
 	int lfd;
