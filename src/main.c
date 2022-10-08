@@ -636,7 +636,7 @@ static void usage()
 static void parse_opts(int argc, char **argv)
 {
 	
-	usbmuxd_log(LL_NOTICE, "parse_opts %s", "11111");
+	usbmuxd_log(LL_INFO, "parse_opts %s", "11111");
 	
 	static struct option longopts[] = {
 		{"help", no_argument, NULL, 'h'},
@@ -677,7 +677,8 @@ static void parse_opts(int argc, char **argv)
 			break;
 		}
 		
-		usbmuxd_log(LL_NOTICE, "parse_opts params %d", c);
+		usbmuxd_log(LL_INFO, "parse_opts params %d", c);
+		usbmuxd_log(LL_INFO, "parse_opts optarg %d", optarg);
 
 		switch (c) {
 		case 'h':
@@ -825,7 +826,7 @@ int main(int argc, char *argv[])
 	if (lockfile && lock.l_type != F_UNLCK) {
 		if (opt_exit) {
 			if (lock.l_pid && !kill(lock.l_pid, 0)) {
-				usbmuxd_log(LL_NOTICE, "Sending signal %d to instance with pid %d", exit_signal, lock.l_pid);
+				usbmuxd_log(LL_INFO, "Sending signal %d to instance with pid %d", exit_signal, lock.l_pid);
 				//logAnd(LL_NOTICE, "Sending signal %d to instance with pid %d", exit_signal, lock.l_pid);
 				res = 0;
 				if (kill(lock.l_pid, exit_signal) < 0) {
@@ -846,7 +847,7 @@ int main(int argc, char *argv[])
 				//logAnd(LL_ERROR, "Another instance is already running (pid %d). exiting.", lock.l_pid);
 				res = -1;
 			} else {
-				usbmuxd_log(LL_NOTICE, "Another instance is already running (pid %d). Telling it to check for devices.", lock.l_pid);
+				usbmuxd_log(LL_INFO, "Another instance is already running (pid %d). Telling it to check for devices.", lock.l_pid);
 				//logAnd(LL_NOTICE, "Another instance is already running (pid %d). Telling it to check for devices.", lock.l_pid);
 				if (lock.l_pid && !kill(lock.l_pid, 0)) {
 					usbmuxd_log(LL_NOTICE, "Sending signal SIGUSR2 to instance with pid %d", lock.l_pid);
@@ -871,7 +872,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (opt_exit) {
-		usbmuxd_log(LL_NOTICE, "No running instance found, none killed. Exiting.");
+		usbmuxd_log(LL_INFO, "No running instance found, none killed. Exiting.");
 		//logAnd(LL_NOTICE, "No running instance found, none killed. Exiting.");
 		goto terminate;
 	}
@@ -1011,7 +1012,7 @@ int main(int argc, char *argv[])
 				res = -1;
 				goto terminate;
 			}
-			usbmuxd_log(LL_NOTICE, "Successfully dropped privileges to '%s'", drop_user);
+			usbmuxd_log(LL_INFO, "Successfully dropped privileges to '%s'", drop_user);
 			//logAnd(LL_NOTICE, "Successfully dropped privileges to '%s'", drop_user);
 		}
 	}
@@ -1030,7 +1031,7 @@ int main(int argc, char *argv[])
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
 	//logAnd(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
 
-	usbmuxd_log(LL_NOTICE, "Initialization complete");
+	usbmuxd_log(LL_INFO, "Initialization complete");
 	//logAnd(LL_NOTICE, "Initialization complete");
 
 	if (report_to_parent)
@@ -1038,12 +1039,12 @@ int main(int argc, char *argv[])
 			goto terminate;
 
 	if(opt_disable_hotplug) {
-		usbmuxd_log(LL_NOTICE, "Automatic device discovery on hotplug disabled.");
+		usbmuxd_log(LL_INFO, "Automatic device discovery on hotplug disabled.");
 		//logAnd(LL_NOTICE, "Automatic device discovery on hotplug disabled.");
 		usb_autodiscover(0); // discovery to be triggered by new instance
 	}
 	if (opt_enable_exit) {
-		usbmuxd_log(LL_NOTICE, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
+		usbmuxd_log(LL_INFO, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
 		//logAnd(LL_NOTICE, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
 	}
 
@@ -1051,13 +1052,13 @@ int main(int argc, char *argv[])
 	if(res < 0)
 		usbmuxd_log(LL_FATAL, "main_loop failed");
 
-	usbmuxd_log(LL_NOTICE, "usbmuxd shutting down");
+	usbmuxd_log(LL_INFO, "usbmuxd shutting down");
 	//logAnd(LL_NOTICE, "usbmuxd shutting down");
 	device_kill_connections();
 	usb_shutdown();
 	device_shutdown();
 	client_shutdown();
-	usbmuxd_log(LL_NOTICE, "Shutdown complete");
+	usbmuxd_log(LL_INFO, "Shutdown complete");
 	//logAnd(LL_NOTICE, "Shutdown complete");
 
 terminate:
