@@ -893,8 +893,8 @@ int usb_init(void)
 	device_polling = 1;
 	res = libusb_init(NULL);
 
-	if (r != 0) {
-		usbmuxd_log(LL_FATAL, "libusb_init failed: %s", libusb_error_name(r));
+	if (res != 0) {
+		usbmuxd_log(LL_FATAL, "libusb_init failed: %d\n", libusb_error_name(res));
 		return -1;
 	}
 
