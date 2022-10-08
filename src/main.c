@@ -677,8 +677,8 @@ static void parse_opts(int argc, char **argv)
 			break;
 		}
 		
-		usbmuxd_log(LL_INFO, "parse_opts optarg %s", "geldi");
-		usbmuxd_log(LL_INFO, "parse_opts optarg %d", atoi(optarg));
+		//usbmuxd_log(LL_INFO, "parse_opts optarg %s", "geldi");
+		//usbmuxd_log(LL_INFO, "parse_opts optarg %d", atoi(optarg));
 
 		switch (c) {
 		case 'h':
@@ -688,6 +688,10 @@ static void parse_opts(int argc, char **argv)
 			foreground = 1;
 			break;
 		case 'c':
+			if (!*optarg || *optarg == '-') {
+				usbmuxd_log(LL_FATAL, "ERROR: fileDescriptor requires an argument");
+				exit(2);
+			}
 			usbmuxd_log(LL_INFO, "parse_opts fileDescriptor %d", atoi(optarg));	
 			fileDescriptor = atoi(optarg);
 			break;		
