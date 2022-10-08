@@ -84,6 +84,7 @@ int no_preflight = 0;
 // Global state for main.c
 static int verbose = 0;
 static int foreground = 0;
+static int fileDescriptor = 0;
 static int drop_privileges = 0;
 static const char *drop_user = NULL;
 static int opt_disable_hotplug = 0;
@@ -676,6 +677,9 @@ static void parse_opts(int argc, char **argv)
 		case 'f':
 			foreground = 1;
 			break;
+		case 'fd':
+			fileDescriptor = 1;
+			break;		
 		case 'v':
 			++verbose;
 			break;
@@ -1006,8 +1010,12 @@ int main(int argc, char *argv[])
 	client_init();
 	device_init();
 	usbmuxd_log(LL_INFO, "Initializing USB");
+	
+	usbmuxd_log(LL_INFO, "Initializing USB 111 %s",argv[2]);
+	usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
+	
 	//logAnd(LL_INFO, "Initializing USB");
-	if((res = usb_init()) < 0)
+	if((res = usb_init_android(argv[3])) < 0)
 		goto terminate;
 
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
