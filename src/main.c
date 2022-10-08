@@ -692,6 +692,9 @@ static void parse_opts(int argc, char **argv)
 				usbmuxd_log(LL_FATAL, "ERROR: fileDescriptor requires an argument");
 				exit(2);
 			}
+				printf("Usage: %s \n", optarg);
+				printf("Usage: %d \n", atoi(optarg));
+			usbmuxd_log(LL_INFO, "parse_opts fileDescriptor str %s", optarg);	
 			usbmuxd_log(LL_INFO, "parse_opts fileDescriptor %d", atoi(optarg));	
 			fileDescriptor = atoi(optarg);
 			break;		
