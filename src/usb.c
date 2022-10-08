@@ -827,6 +827,7 @@ int usb_init_android(int fileDescriptor)
 	const struct libusb_version* libusb_version_info = libusb_get_version();
 	usbmuxd_log(LL_NOTICE, "Using libusb %d.%d.%d", libusb_version_info->major, libusb_version_info->minor, libusb_version_info->micro);
 	usbmuxd_log(LL_NOTICE, "Using fileDescriptor %d", fileDescriptor);
+	printf("usb_init_android fileDescriptor %d \n", fileDescriptor);
 
 	devlist_failures = 0;
 	device_polling = 1;
@@ -846,8 +847,14 @@ int usb_init_android(int fileDescriptor)
 	    }
 	    r = libusb_wrap_sys_device(ctx, (intptr_t)fileDescriptor, &devh);
 	    if (r < 0) {
-		usbmuxd_log(LL_NOTICE, "libusb_wrap_sys_device failed: %d\n", r);
-		return r;
+		    usbmuxd_log(LL_NOTICE, "libusb_wrap_sys_device failed 111: %d\n", r);
+		  r = libusb_wrap_sys_device(NULL, (intptr_t)fileDescriptor, &devh);
+		    if (r < 0) {		    
+			usbmuxd_log(LL_NOTICE, "libusb_wrap_sys_device failed 222: %d\n", r);
+			return r;
+	    		}
+		    
+		
 	    } else if (devh == NULL) {
 		 usbmuxd_log(LL_NOTICE, "libusb_wrap_sys_device returned invalid handle\n");
 		return r;
