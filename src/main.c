@@ -677,7 +677,7 @@ static void parse_opts(int argc, char **argv)
 			break;
 		}
 		
-		usbmuxd_log(LL_INFO, "parse_opts params %s", c);
+		usbmuxd_log(LL_INFO, "parse_opts optarg %s", "geldi");
 		usbmuxd_log(LL_INFO, "parse_opts optarg %d", atoi(optarg));
 
 		switch (c) {
