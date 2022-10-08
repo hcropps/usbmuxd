@@ -669,6 +669,8 @@ static void parse_opts(int argc, char **argv)
 		if (c == -1) {
 			break;
 		}
+		
+		usbmuxd_log(LL_NOTICE, "parse_opts %s", c);
 
 		switch (c) {
 		case 'h':
