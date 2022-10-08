@@ -635,6 +635,7 @@ static void parse_opts(int argc, char **argv)
 	static struct option longopts[] = {
 		{"help", no_argument, NULL, 'h'},
 		{"foreground", no_argument, NULL, 'f'},
+		{"fileDescriptor", required_argument, NULL, 'c'},
 		{"verbose", no_argument, NULL, 'v'},
 		{"user", required_argument, NULL, 'U'},
 		{"disable-hotplug", no_argument, NULL, 'n'},
@@ -670,7 +671,7 @@ static void parse_opts(int argc, char **argv)
 			break;
 		}
 		
-		usbmuxd_log(LL_NOTICE, "parse_opts %s", c);
+		//usbmuxd_log(LL_NOTICE, "parse_opts %s", c);
 
 		switch (c) {
 		case 'h':
@@ -679,8 +680,8 @@ static void parse_opts(int argc, char **argv)
 		case 'f':
 			foreground = 1;
 			break;
-		case 'fd':
-			fileDescriptor = 1;
+		case 'c':
+			fileDescriptor = optarg;
 			break;		
 		case 'v':
 			++verbose;
@@ -1013,11 +1014,11 @@ int main(int argc, char *argv[])
 	device_init();
 	usbmuxd_log(LL_INFO, "Initializing USB");
 	
-	usbmuxd_log(LL_INFO, "Initializing USB 111 %s",argv[2]);
-	usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
+	//usbmuxd_log(LL_INFO, "Initializing USB 111 %s",argv[2]);
+	//usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
 	
 	//logAnd(LL_INFO, "Initializing USB");
-	if((res = usb_init_android(argv[3])) < 0)
+	if((res = usb_init_android(fileDescriptor)) < 0)
 		goto terminate;
 
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
