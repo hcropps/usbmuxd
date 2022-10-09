@@ -835,7 +835,8 @@ int usb_init_android(int fileDescriptor)
 	libusb_context *ctx = NULL;
 	    libusb_device_handle *devh = NULL;
 	    int r = 0;
-	    r = libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	    //r = libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	 r = libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
 	    if (r != LIBUSB_SUCCESS) {
 		usbmuxd_log(LL_NOTICE, "libusb_set_option failed: %d\n", r);
 		return -1;
