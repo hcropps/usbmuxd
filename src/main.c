@@ -1038,10 +1038,10 @@ int main(int argc, char *argv[])
 	//if((res = usb_init_android(fileDescriptor)) < 0)
 	//	goto terminate;
 	
-	if((res = usb_init()) < 0){
-		usbmuxd_log(LL_INFO, "Initializing USB usb_init terminate %d",res);
-		goto terminate;
-	}
+	//if((res = usb_init()) < 0){
+	//	usbmuxd_log(LL_INFO, "Initializing USB usb_init terminate %d",res);
+	//	goto terminate;
+	//}
 
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
 	//logAnd(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
