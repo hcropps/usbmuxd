@@ -1035,8 +1035,13 @@ int main(int argc, char *argv[])
 	//usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
 	
 	//logAnd(LL_INFO, "Initializing USB");
-	if((res = usb_init_android(fileDescriptor)) < 0)
+	//if((res = usb_init_android(fileDescriptor)) < 0)
+	//	goto terminate;
+	
+	if((res = usb_init()) < 0){
+		usbmuxd_log(LL_INFO, "Initializing USB usb_init terminate %d",res);
 		goto terminate;
+	}
 
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
 	//logAnd(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
