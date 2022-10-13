@@ -897,23 +897,25 @@ int usb_init(void)
 	int res;
 	const struct libusb_version* libusb_version_info = libusb_get_version();
 	usbmuxd_log(LL_NOTICE, "Using libusb %d.%d.%d", libusb_version_info->major, libusb_version_info->minor, libusb_version_info->micro);
+	printf("Using libusb %d.%d.%d", libusb_version_info->major, libusb_version_info->minor, libusb_version_info->micro);
 
 	devlist_failures = 0;
 	device_polling = 1;
 	
-	libusb_context *ctx = NULL;
-	    libusb_device_handle *devh = NULL;
+	//libusb_context *ctx = NULL;
+	//    libusb_device_handle *devh = NULL;
 	    //r = libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
-	 res = libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
-	    if (res != LIBUSB_SUCCESS) {
-		usbmuxd_log(LL_NOTICE, "libusb_set_option failed: %d\n", res);
-		return -1;
-	    }
-	    res = libusb_init(&ctx);
+	// res = libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	//    if (res != LIBUSB_SUCCESS) {
+	//	usbmuxd_log(LL_NOTICE, "libusb_set_option failed: %d\n", res);
+	//	return -1;
+	//    }
+	//    res = libusb_init(&ctx);
 	
-	//res = libusb_init(NULL);
+	res = libusb_init(NULL);
 
 	if (res != 0) {
+		printf("libusb_init failed: %d\n", libusb_error_name(res));
 		usbmuxd_log(LL_FATAL, "libusb_init failed: %d\n", libusb_error_name(res));
 		return -1;
 	}
@@ -924,26 +926,32 @@ int usb_init(void)
 	libusb_set_debug(NULL, (log_level >= LL_DEBUG ? LIBUSB_LOG_LEVEL_DEBUG: (log_level >= LL_WARNING ? LIBUSB_LOG_LEVEL_WARNING: LIBUSB_LOG_LEVEL_NONE)));
 #endif
 
+	printf("collection_init geldi");
 	collection_init(&device_list);
 
 #ifdef HAVE_LIBUSB_HOTPLUG_API
 	if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
+		printf("Registering for libusb hotplug events");
 		usbmuxd_log(LL_INFO, "Registering for libusb hotplug events");
 		res = libusb_hotplug_register_callback(NULL, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, LIBUSB_HOTPLUG_ENUMERATE, VID_APPLE, LIBUSB_HOTPLUG_MATCH_ANY, 0, usb_hotplug_cb, NULL, &usb_hotplug_cb_handle);
 		if (res == LIBUSB_SUCCESS) {
 			device_polling = 0;
 		} else {
+			printf("ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
 			usbmuxd_log(LL_ERROR, "ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
 		}
 	} else {
+		printf("libusb does not support hotplug events");
 		usbmuxd_log(LL_ERROR, "libusb does not support hotplug events");
 	}
 #endif
 	if (device_polling) {
+		printf("usb_discover geldi");
 		res = usb_discover();
 		if (res >= 0) {
 		}
 	} else {
+		printf("collection_count geldi");
 		res = collection_count(&device_list);
 	}
 	return res;
