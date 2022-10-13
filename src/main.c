@@ -1029,8 +1029,8 @@ int main(int argc, char *argv[])
 	client_init();
 	device_init();
 	usbmuxd_log(LL_INFO, "Initializing USB %d",fileDescriptor);
-	printf("Initializing USB %d \n", fileDescriptor);
-	return res;
+	printf("libusbPrint Initializing USB %d \n", fileDescriptor);
+	//return res;
 	
 	//usbmuxd_log(LL_INFO, "Initializing USB 111 %s",argv[2]);
 	//usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
@@ -1039,15 +1039,18 @@ int main(int argc, char *argv[])
 	//if((res = usb_init_android(fileDescriptor)) < 0)
 	//	goto terminate;
 	
-	//if((res = usb_init()) < 0){
-	//	usbmuxd_log(LL_INFO, "Initializing USB usb_init terminate %d",res);
-	//	goto terminate;
-	//}
+	if((res = usb_init()) < 0){
+		printf("libusbPrint Initializing USB usb_init terminate %d",res);
+		usbmuxd_log(LL_INFO, "Initializing USB usb_init terminate %d",res);
+		goto terminate;
+	}
 
 	usbmuxd_log(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
+	printf("libusbPrint %d device%s detected", res, (res==1)?"":"s");
 	//logAnd(LL_INFO, "%d device%s detected", res, (res==1)?"":"s");
 
 	usbmuxd_log(LL_INFO, "Initialization complete");
+	printf("libusbPrint Initialization complete");
 	//logAnd(LL_NOTICE, "Initialization complete");
 
 	if (report_to_parent)
@@ -1055,19 +1058,24 @@ int main(int argc, char *argv[])
 			goto terminate;
 
 	if(opt_disable_hotplug) {
+		printf("libusbPrint Automatic device discovery on hotplug disabled.");
 		usbmuxd_log(LL_INFO, "Automatic device discovery on hotplug disabled.");
 		//logAnd(LL_NOTICE, "Automatic device discovery on hotplug disabled.");
 		usb_autodiscover(0); // discovery to be triggered by new instance
 	}
 	if (opt_enable_exit) {
+		printf("libusbPrint Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
 		usbmuxd_log(LL_INFO, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
 		//logAnd(LL_NOTICE, "Enabled exit on SIGUSR1 if no devices are attached. Start a new instance with \"--exit\" to trigger.");
 	}
 
 	res = main_loop(listenfd);
-	if(res < 0)
+	if(res < 0){
+		printf("libusbPrint main_loop failed");
 		usbmuxd_log(LL_FATAL, "main_loop failed");
-
+	}
+		
+	printf("libusbPrint usbmuxd shutting down");
 	usbmuxd_log(LL_INFO, "usbmuxd shutting down");
 	//logAnd(LL_NOTICE, "usbmuxd shutting down");
 	device_kill_connections();
@@ -1075,6 +1083,7 @@ int main(int argc, char *argv[])
 	device_shutdown();
 	client_shutdown();
 	usbmuxd_log(LL_INFO, "Shutdown complete");
+	printf("libusbPrint Shutdown complete");
 	//logAnd(LL_NOTICE, "Shutdown complete");
 
 terminate:
