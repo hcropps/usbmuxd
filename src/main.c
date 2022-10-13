@@ -1030,6 +1030,7 @@ int main(int argc, char *argv[])
 	device_init();
 	usbmuxd_log(LL_INFO, "Initializing USB %d",fileDescriptor);
 	printf("Initializing USB %d \n", fileDescriptor);
+	return res;
 	
 	//usbmuxd_log(LL_INFO, "Initializing USB 111 %s",argv[2]);
 	//usbmuxd_log(LL_INFO, "Initializing USB 2222 %s",argv[3]);
