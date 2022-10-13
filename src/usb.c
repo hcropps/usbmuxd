@@ -900,7 +900,18 @@ int usb_init(void)
 
 	devlist_failures = 0;
 	device_polling = 1;
-	res = libusb_init(NULL);
+	
+	libusb_context *ctx = NULL;
+	    libusb_device_handle *devh = NULL;
+	    //r = libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	 res = libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	    if (res != LIBUSB_SUCCESS) {
+		usbmuxd_log(LL_NOTICE, "libusb_set_option failed: %d\n", res);
+		return -1;
+	    }
+	    res = libusb_init(&ctx);
+	
+	//res = libusb_init(NULL);
 
 	if (res != 0) {
 		usbmuxd_log(LL_FATAL, "libusb_init failed: %d\n", libusb_error_name(res));
