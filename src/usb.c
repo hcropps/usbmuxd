@@ -926,18 +926,18 @@ int usb_init(void)
 	libusb_set_debug(NULL, (log_level >= LL_DEBUG ? LIBUSB_LOG_LEVEL_DEBUG: (log_level >= LL_WARNING ? LIBUSB_LOG_LEVEL_WARNING: LIBUSB_LOG_LEVEL_NONE)));
 #endif
 
-	printf("collection_init geldi");
+	printf("libusb_init collection_init geldi");
 	collection_init(&device_list);
 
 #ifdef HAVE_LIBUSB_HOTPLUG_API
 	if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
-		printf("Registering for libusb hotplug events");
+		printf("libusb_init Registering for libusb hotplug events");
 		usbmuxd_log(LL_INFO, "Registering for libusb hotplug events");
 		res = libusb_hotplug_register_callback(NULL, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, LIBUSB_HOTPLUG_ENUMERATE, VID_APPLE, LIBUSB_HOTPLUG_MATCH_ANY, 0, usb_hotplug_cb, NULL, &usb_hotplug_cb_handle);
 		if (res == LIBUSB_SUCCESS) {
 			device_polling = 0;
 		} else {
-			printf("ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
+			printf("libusb_init ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
 			usbmuxd_log(LL_ERROR, "ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
 		}
 	} else {
@@ -946,12 +946,12 @@ int usb_init(void)
 	}
 #endif
 	if (device_polling) {
-		printf("usb_discover geldi");
+		printf("libusb_init usb_discover geldi");
 		res = usb_discover();
 		if (res >= 0) {
 		}
 	} else {
-		printf("collection_count geldi");
+		printf("libusb_init collection_count geldi");
 		res = collection_count(&device_list);
 	}
 	return res;
