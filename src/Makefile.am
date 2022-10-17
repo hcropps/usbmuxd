@@ -17,6 +17,7 @@ AM_LDFLAGS = \
 	$(libpthread_LIBS)
 
 sbin_PROGRAMS = usbmuxd
+lib_LTLIBRARIES = libusbmuxdreal.la
 
 usbmuxd_CFLAGS = $(AM_CFLAGS)
 usbmuxd_LDFLAGS = $(AM_LDFLAGS) -no-undefined
