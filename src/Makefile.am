@@ -17,11 +17,25 @@ AM_LDFLAGS = \
 	$(libpthread_LIBS)
 
 sbin_PROGRAMS = usbmuxd
-lib_LTLIBRARIES = libusbmuxdreal.la
+
 
 usbmuxd_CFLAGS = $(AM_CFLAGS)
 usbmuxd_LDFLAGS = $(AM_LDFLAGS) -no-undefined
 usbmuxd_SOURCES = \
+	client.c client.h \
+	device.c device.h \
+	preflight.c preflight.h \
+	log.c log.h \
+	usbmuxd-proto.h \
+	usb.c usb.h \
+	utils.c utils.h \
+	conf.c conf.h \
+	main.c
+	
+lib_LTLIBRARIES = libusbmuxdreal.la
+libusbmuxdreal_CFLAGS = $(AM_CFLAGS)
+libusbmuxdreal_LDFLAGS = $(AM_LDFLAGS) -no-undefined
+libusbmuxdreal_SOURCES = \
 	client.c client.h \
 	device.c device.h \
 	preflight.c preflight.h \
