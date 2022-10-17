@@ -33,9 +33,9 @@ usbmuxd_SOURCES = \
 	main.c
 	
 lib_LTLIBRARIES = libusbmuxdreal.la
-libusbmuxdreal_CFLAGS = $(AM_CFLAGS)
-libusbmuxdreal_LDFLAGS = $(AM_LDFLAGS) -no-undefined
-libusbmuxdreal_SOURCES = \
+libusbmuxdreal_la_CFLAGS = $(AM_CFLAGS)
+libusbmuxdreal_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined
+libusbmuxdreal_la_SOURCES = \
 	client.c client.h \
 	device.c device.h \
 	preflight.c preflight.h \
