@@ -912,6 +912,10 @@ int usb_init(void)
 	//    }
 	//    res = libusb_init(&ctx);
 	
+	#if defined(__ANDROID__)
+		libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+	#endif
+	
 	res = libusb_init(NULL);
 
 	if (res != 0) {
