@@ -69,6 +69,7 @@ void usbmuxd_log(enum loglevel level, const char *fmt, ...)
 	
 	//logAnd("usbmuxd_log %s", "1111");
 	logAnd(fmt);
+	return;
 	
 	va_list ap;
 	char *fs;
