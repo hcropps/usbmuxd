@@ -20,6 +20,15 @@ PKG_CHECK_MODULES(libplist, libplist-2.0 >= 2.2.0)
 PKG_CHECK_MODULES(libimobiledevice, libimobiledevice-1.0 >= 1.3.0, have_limd=yes, have_limd=no)
 PKG_CHECK_MODULES(limd_glue, libimobiledevice-glue-1.0 >= 1.0.0)
 
+AC_DEFINE(HAVE_LIBIMOBILEDEVICE, 1, [Define if you have libimobiledevice support])
+AC_DEFINE(HAVE_CLOCK_GETTIME, 1, [Define if you have libimobiledevice support])
+AC_DEFINE(HAVE_PPOLL, 1, [Define if you have libimobiledevice support])
+AC_DEFINE(HAVE_LIBUSB_HOTPLUG_API, 1, [Define if you have libimobiledevice support])
+AC_DEFINE(HAVE_SYS_TYPES_H, 1, [Define if you have libimobiledevice support])
+AC_DEFINE(HAVE_ENUM_IDEVICE_CONNECTION_TYPE, 1, [Define if you have libimobiledevice support])
+AC_DEFINE(HAVE_LIBUSB_HOTPLUG_API, 1, [Define if you have libimobiledevice support])
+
+
 AC_ARG_WITH([preflight],
             [AS_HELP_STRING([--without-preflight],
             [do not build with preflight worker support @<:@default=yes@:>@])],
