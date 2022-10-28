@@ -916,7 +916,7 @@ int usb_init(void)
 		libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
 	#endif
 	
-	printf("libusb_init geldi");
+	usbmuxd_log(LL_NOTICE, "libusb_init geldi");
 	res = libusb_init(NULL);
 
 	if (res != 0) {
@@ -926,7 +926,7 @@ int usb_init(void)
 	}
 
 
-
+	usbmuxd_log(LL_NOTICE, "libusb_init collection_init geldi");
 	printf("libusb_init collection_init geldi");
 	collection_init(&device_list);
 
