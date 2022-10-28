@@ -925,11 +925,7 @@ int usb_init(void)
 		return -1;
 	}
 
-#if LIBUSB_API_VERSION >= 0x01000106
-	#libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, (log_level >= LL_DEBUG ? LIBUSB_LOG_LEVEL_DEBUG: (log_level >= LL_WARNING ? LIBUSB_LOG_LEVEL_WARNING: LIBUSB_LOG_LEVEL_NONE)));
-#else
-	#libusb_set_debug(NULL, (log_level >= LL_DEBUG ? LIBUSB_LOG_LEVEL_DEBUG: (log_level >= LL_WARNING ? LIBUSB_LOG_LEVEL_WARNING: LIBUSB_LOG_LEVEL_NONE)));
-#endif
+
 
 	printf("libusb_init collection_init geldi");
 	collection_init(&device_list);
