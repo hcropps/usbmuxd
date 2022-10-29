@@ -599,19 +599,23 @@ static int usb_device_add(libusb_device* dev)
 
 int usb_discover(void)
 {
+	
+	usbmuxd_log(LL_INFO, "libusb_init usb_discover geldi");
+	
 	int cnt, i;
 	int valid_count = 0;
 	libusb_device **devs;
 
 	cnt = libusb_get_device_list(NULL, &devs);
 	if(cnt < 0) {
-		usbmuxd_log(LL_WARNING, "Could not get device list: %d", cnt);
+		usbmuxd_log(LL_WARNING, "libusb_init Could not get device list: %d", cnt);
 		devlist_failures++;
 		// sometimes libusb fails getting the device list if you've just removed something
 		if(devlist_failures > 5) {
-			usbmuxd_log(LL_FATAL, "Too many errors getting device list");
+			usbmuxd_log(LL_INFO, "libusb_init Too many errors getting device list");
 			return cnt;
 		} else {
+			usbmuxd_log(LL_INFO, "libusb_init devlist_failures else");
 			get_tick_count(&next_dev_poll_time);
 			next_dev_poll_time.tv_usec += DEVICE_POLL_TIME * 1000;
 			next_dev_poll_time.tv_sec += next_dev_poll_time.tv_usec / 1000000;
@@ -621,7 +625,7 @@ int usb_discover(void)
 	}
 	devlist_failures = 0;
 
-	usbmuxd_log(LL_SPEW, "usb_discover: scanning %d devices", cnt);
+	usbmuxd_log(LL_INFO, "libusb_init usb_discover: scanning %d devices", cnt);
 
 	// Mark all devices as dead, and do a mark-sweep like
 	// collection of dead devices
@@ -629,6 +633,8 @@ int usb_discover(void)
 		usbdev->alive = 0;
 	} ENDFOREACH
 
+		usbmuxd_log(LL_INFO, "libusb_init usb_discover 1111");
+		
 	// Enumerate all USB devices and mark the ones we already know
 	// about as live, again
 	for(i=0; i<cnt; i++) {
@@ -638,16 +644,24 @@ int usb_discover(void)
 		}
 		valid_count++;
 	}
+	
+	usbmuxd_log(LL_INFO, "libusb_init usb_discover 2222");
 
 	// Clean out any device we didn't mark back as live
 	reap_dead_devices();
+	
+	usbmuxd_log(LL_INFO, "libusb_init usb_discover 3333");
 
 	libusb_free_device_list(devs, 1);
+	
+	usbmuxd_log(LL_INFO, "libusb_init usb_discover 4444");
 
 	get_tick_count(&next_dev_poll_time);
 	next_dev_poll_time.tv_usec += DEVICE_POLL_TIME * 1000;
 	next_dev_poll_time.tv_sec += next_dev_poll_time.tv_usec / 1000000;
 	next_dev_poll_time.tv_usec = next_dev_poll_time.tv_usec % 1000000;
+	
+	usbmuxd_log(LL_INFO, "libusb_init usb_discover 5555");
 
 	return valid_count;
 }
@@ -936,6 +950,7 @@ int usb_init(void)
 		usbmuxd_log(LL_INFO, "Registering for libusb hotplug events");
 		res = libusb_hotplug_register_callback(NULL, LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT, LIBUSB_HOTPLUG_ENUMERATE, VID_APPLE, LIBUSB_HOTPLUG_MATCH_ANY, 0, usb_hotplug_cb, NULL, &usb_hotplug_cb_handle);
 		if (res == LIBUSB_SUCCESS) {
+			usbmuxd_log(LL_INFO, "libusb libusb_hotplug_register_callback LIBUSB_SUCCESS");
 			device_polling = 0;
 		} else {
 			printf("libusb_init ERROR: Could not register for libusb hotplug events. %s", libusb_error_name(res));
@@ -947,12 +962,14 @@ int usb_init(void)
 	}
 #endif
 	if (device_polling) {
-		printf("libusb_init usb_discover geldi");
+		printf("libusb_init usb_discover geldi init func");
+		usbmuxd_log(LL_INFO, "libusb_init usb_discover geldi init func");
 		res = usb_discover();
 		if (res >= 0) {
 		}
 	} else {
-		printf("libusb_init collection_count geldi");
+		usbmuxd_log(LL_INFO, "libusb_init collection_count geldi init func");
+		printf("libusb_init collection_count geldi init func");
 		res = collection_count(&device_list);
 	}
 	return res;
