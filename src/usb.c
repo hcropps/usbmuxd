@@ -961,7 +961,7 @@ int usb_init(void)
 		usbmuxd_log(LL_ERROR, "libusb does not support hotplug events");
 	}
 #endif
-	if (device_polling) {
+	if (!device_polling) {
 		printf("libusb_init usb_discover geldi init func");
 		usbmuxd_log(LL_INFO, "libusb_init usb_discover geldi init func");
 		res = usb_discover();
