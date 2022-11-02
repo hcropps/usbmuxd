@@ -381,17 +381,17 @@ static void set_signal_handlers(void)
 #ifndef HAVE_PPOLL
 static int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask)
 {
-	usbmuxd_log(LL_FATAL, "ppoll 1111");
+	usbmuxd_log(LL_FLOOD, "ppoll 1111");
 	int ready;
 	sigset_t origmask;
 	int to = timeout->tv_sec*1000 + timeout->tv_nsec/1000000;
-usbmuxd_log(LL_FATAL, "ppoll 2222");
-	sigprocmask(SIG_SETMASK, sigmask, &origmask);
+usbmuxd_log(LL_FLOOD, "ppoll 2222");
+	sigprocmask(LL_FLOOD, sigmask, &origmask);
 	usbmuxd_log(LL_FATAL, "ppoll 3333");
 	ready = poll(fds, nfds, to);
-	usbmuxd_log(LL_FATAL, "ppoll 4444");
+	usbmuxd_log(LL_FLOOD, "ppoll 4444");
 	sigprocmask(SIG_SETMASK, &origmask, NULL);
-	usbmuxd_log(LL_FATAL, "ppoll 5555");
+	usbmuxd_log(LL_FLOOD, "ppoll 5555");
 
 	return ready;
 }
@@ -427,7 +427,9 @@ static int main_loop(int listenfd)
 		//logAnd(LL_FLOOD, "fd count is %d", pollfds.count);
 
 		tspec.tv_sec = to / 1000;
+		usbmuxd_log(LL_FLOOD, "main_loop iteration aaaa");
 		tspec.tv_nsec = (to % 1000) * 1000000;
+		usbmuxd_log(LL_FLOOD, "main_loop iteration bbbb");
 		cnt = ppoll(pollfds.fds, pollfds.count, &tspec, &empty_sigset);
 		usbmuxd_log(LL_FLOOD, "poll() returned %d", cnt);
 		//logAnd(LL_FLOOD, "poll() returned %d", cnt);
@@ -436,13 +438,13 @@ static int main_loop(int listenfd)
 			if(errno == EINTR) {
 				usbmuxd_log(LL_FLOOD, "cnt 1111 aaaaa");
 				if(should_exit) {
-					usbmuxd_log(LL_INFO, "Event processing interrupted");
+					usbmuxd_log(LL_FLOOD, "Event processing interrupted");
 					//logAnd(LL_INFO, "Event processing interrupted");
 					break;
 				}
 				if(should_discover) {
 					should_discover = 0;
-					usbmuxd_log(LL_INFO, "Device discovery triggered");
+					usbmuxd_log(LL_FLOOD, "Device discovery triggered");
 					//logAnd(LL_INFO, "Device discovery triggered");
 					usb_discover();
 				}
@@ -450,7 +452,7 @@ static int main_loop(int listenfd)
 		} else if(cnt == 0) {
 			usbmuxd_log(LL_FLOOD, "cnt 00000");
 			if(usb_process() < 0) {
-				usbmuxd_log(LL_FATAL, "usb_process() failed");
+				usbmuxd_log(LL_FLOOD, "usb_process() failed");
 				//logAnd(LL_FATAL, "usb_process() failed");
 				fdlist_free(&pollfds);
 				return -1;
@@ -467,7 +469,7 @@ static int main_loop(int listenfd)
 					if(!done_usb && pollfds.owners[i] == FD_USB) {
 						usbmuxd_log(LL_FLOOD, "cnt else 22222");
 						if(usb_process() < 0) {
-							usbmuxd_log(LL_FATAL, "usb_process() failed");
+							usbmuxd_log(LL_FLOOD, "usb_process() failed");
 							//logAnd(LL_FATAL, "usb_process() failed");
 							fdlist_free(&pollfds);
 							return -1;
@@ -477,7 +479,7 @@ static int main_loop(int listenfd)
 					if(pollfds.owners[i] == FD_LISTEN) {
 						usbmuxd_log(LL_FLOOD, "cnt else 3333");
 						if(client_accept(listenfd) < 0) {
-							usbmuxd_log(LL_FATAL, "client_accept() failed");
+							usbmuxd_log(LL_FLOOD, "client_accept() failed");
 							//logAnd(LL_FATAL, "client_accept() failed");
 							fdlist_free(&pollfds);
 							return -1;
