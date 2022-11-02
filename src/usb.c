@@ -114,8 +114,11 @@ static void usb_disconnect(struct usb_device *dev)
 }
 
 static void reap_dead_devices(void) {
+	usbmuxd_log(LL_FLOOD, "reap_dead_devices geldi 1111");
 	FOREACH(struct usb_device *usbdev, &device_list) {
+		usbmuxd_log(LL_FLOOD, "reap_dead_devices geldi 22222");
 		if(!usbdev->alive) {
+			usbmuxd_log(LL_FLOOD, "reap_dead_devices geldi 3333");
 			device_remove(usbdev);
 			usb_disconnect(usbdev);
 		}
@@ -599,7 +602,6 @@ static int usb_device_add(libusb_device* dev)
 
 int usb_discover(void)
 {
-	
 	usbmuxd_log(LL_INFO, "libusb_init usb_discover geldi");
 	
 	int cnt, i;
@@ -759,6 +761,7 @@ int usb_get_timeout(void)
 
 int usb_process(void)
 {
+	usbmuxd_log(LL_FLOOD, "usb_process geldi 1111");
 	int res;
 	struct timeval tv;
 	tv.tv_sec = tv.tv_usec = 0;
@@ -768,16 +771,22 @@ int usb_process(void)
 		return res;
 	}
 
+	
+	usbmuxd_log(LL_FLOOD, "usb_process geldi 2222");
 	// reap devices marked dead due to an RX error
 	reap_dead_devices();
 
 	if(dev_poll_remain_ms() <= 0) {
+		
+	usbmuxd_log(LL_FLOOD, "usb_process geldi 33333");
 		res = usb_discover();
 		if(res < 0) {
 			usbmuxd_log(LL_ERROR, "usb_discover failed: %s", libusb_error_name(res));
 			return res;
 		}
 	}
+	
+	usbmuxd_log(LL_FLOOD, "usb_process geldi 4444");
 	return 0;
 }
 
