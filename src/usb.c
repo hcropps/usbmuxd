@@ -970,19 +970,7 @@ int usb_init(void)
 	} else {
 		usbmuxd_log(LL_INFO, "libusb_init collection_count geldi init func");
 		printf("libusb_init collection_count geldi init func");
-		//res = collection_count(&device_list);
-		
-		usbmuxd_log(LL_INFO, "libusb_init collection_count capacity %d",device_list->capacity);
-		int i, cnt = 0;
-		for(i=0; i<device_list->capacity; i++) {
-			usbmuxd_log(LL_INFO, "libusb_init collection_count capacity i %d",i);
-			if(device_list->list[i]){
-				usbmuxd_log(LL_INFO, "libusb_init collection_count capacity i 222 %d",i);
-				res++;
-			}
-		}
-		
-		
+		res = collection_count(&device_list);
 	}
 	return res;
 }
