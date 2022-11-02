@@ -428,7 +428,9 @@ static int main_loop(int listenfd)
 		usbmuxd_log(LL_FLOOD, "poll() returned %d", cnt);
 		//logAnd(LL_FLOOD, "poll() returned %d", cnt);
 		if(cnt == -1) {
+			usbmuxd_log(LL_FLOOD, "cnt 1111");
 			if(errno == EINTR) {
+				usbmuxd_log(LL_FLOOD, "cnt 1111 aaaaa");
 				if(should_exit) {
 					usbmuxd_log(LL_INFO, "Event processing interrupted");
 					//logAnd(LL_INFO, "Event processing interrupted");
@@ -442,18 +444,24 @@ static int main_loop(int listenfd)
 				}
 			}
 		} else if(cnt == 0) {
+			usbmuxd_log(LL_FLOOD, "cnt 00000");
 			if(usb_process() < 0) {
 				usbmuxd_log(LL_FATAL, "usb_process() failed");
 				//logAnd(LL_FATAL, "usb_process() failed");
 				fdlist_free(&pollfds);
 				return -1;
 			}
+			usbmuxd_log(LL_FLOOD, "cnt 00000 aaaaa");
 			device_check_timeouts();
 		} else {
+			usbmuxd_log(LL_FLOOD, "cnt else");
 			int done_usb = 0;
 			for(i=0; i<pollfds.count; i++) {
+				usbmuxd_log(LL_FLOOD, "cnt else i %d",i);
 				if(pollfds.fds[i].revents) {
+					usbmuxd_log(LL_FLOOD, "cnt else 1111");
 					if(!done_usb && pollfds.owners[i] == FD_USB) {
+						usbmuxd_log(LL_FLOOD, "cnt else 22222");
 						if(usb_process() < 0) {
 							usbmuxd_log(LL_FATAL, "usb_process() failed");
 							//logAnd(LL_FATAL, "usb_process() failed");
@@ -463,6 +471,7 @@ static int main_loop(int listenfd)
 						done_usb = 1;
 					}
 					if(pollfds.owners[i] == FD_LISTEN) {
+						usbmuxd_log(LL_FLOOD, "cnt else 3333");
 						if(client_accept(listenfd) < 0) {
 							usbmuxd_log(LL_FATAL, "client_accept() failed");
 							//logAnd(LL_FATAL, "client_accept() failed");
@@ -471,12 +480,14 @@ static int main_loop(int listenfd)
 						}
 					}
 					if(pollfds.owners[i] == FD_CLIENT) {
+						usbmuxd_log(LL_FLOOD, "cnt else 444444");
 						client_process(pollfds.fds[i].fd, pollfds.fds[i].revents);
 					}
 				}
 			}
 		}
 	}
+	usbmuxd_log(LL_FLOOD, "cnt 55555");
 	fdlist_free(&pollfds);
 	return 0;
 }
