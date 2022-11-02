@@ -378,8 +378,8 @@ static void set_signal_handlers(void)
 	sigaction(SIGUSR2, &sa, NULL);
 }
 
-
-static int ppoll2(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask)
+#ifndef HAVE_PPOLL
+static int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask)
 {
 	usbmuxd_log(LL_FLOOD, "ppoll 1111");
 	int ready;
@@ -395,7 +395,7 @@ usbmuxd_log(LL_FLOOD, "ppoll 2222");
 
 	return ready;
 }
-
+#endif
 
 static int main_loop(int listenfd)
 {
@@ -430,7 +430,7 @@ static int main_loop(int listenfd)
 		usbmuxd_log(LL_FLOOD, "main_loop iteration aaaa");
 		tspec.tv_nsec = (to % 1000) * 1000000;
 		usbmuxd_log(LL_FLOOD, "main_loop iteration bbbb");
-		cnt = ppoll2(pollfds.fds, pollfds.count, &tspec, &empty_sigset);
+		cnt = ppoll(pollfds.fds, pollfds.count, &tspec, &empty_sigset);
 		usbmuxd_log(LL_FLOOD, "poll() returned %d", cnt);
 		//logAnd(LL_FLOOD, "poll() returned %d", cnt);
 		if(cnt == -1) {
