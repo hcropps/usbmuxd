@@ -378,7 +378,6 @@ static void set_signal_handlers(void)
 	sigaction(SIGUSR2, &sa, NULL);
 }
 
-#ifndef HAVE_PPOLL
 static int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask)
 {
 	usbmuxd_log(LL_FLOOD, "ppoll 1111");
@@ -387,7 +386,7 @@ static int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout
 	int to = timeout->tv_sec*1000 + timeout->tv_nsec/1000000;
 usbmuxd_log(LL_FLOOD, "ppoll 2222");
 	sigprocmask(LL_FLOOD, sigmask, &origmask);
-	usbmuxd_log(LL_FATAL, "ppoll 3333");
+	usbmuxd_log(LL_FLOOD, "ppoll 3333");
 	ready = poll(fds, nfds, to);
 	usbmuxd_log(LL_FLOOD, "ppoll 4444");
 	sigprocmask(SIG_SETMASK, &origmask, NULL);
@@ -395,7 +394,6 @@ usbmuxd_log(LL_FLOOD, "ppoll 2222");
 
 	return ready;
 }
-#endif
 
 static int main_loop(int listenfd)
 {
