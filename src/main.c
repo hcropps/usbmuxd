@@ -378,6 +378,7 @@ static void set_signal_handlers(void)
 	sigaction(SIGUSR2, &sa, NULL);
 }
 
+#ifndef HAVE_PPOLL
 static int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask)
 {
 	usbmuxd_log(LL_FLOOD, "ppoll 1111");
@@ -394,6 +395,7 @@ usbmuxd_log(LL_FLOOD, "ppoll 2222");
 
 	return ready;
 }
+#endif
 
 static int main_loop(int listenfd)
 {
