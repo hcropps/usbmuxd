@@ -955,6 +955,9 @@ int main(int argc, char *argv[])
 	const char* userprefdir = config_get_config_dir();
 	struct stat fst;
 	memset(&fst, '\0', sizeof(struct stat));
+	
+	usbmuxd_log(LL_WARNING, "userprefdir %s", userprefdir);
+	
 	if (stat(userprefdir, &fst) < 0) {
 		if (mkdir(userprefdir, 0775) < 0) {
 			usbmuxd_log(LL_FATAL, "Failed to create required directory '%s': %s", userprefdir, strerror(errno));
