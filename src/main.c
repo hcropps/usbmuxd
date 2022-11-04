@@ -956,7 +956,7 @@ int main(int argc, char *argv[])
 	struct stat fst;
 	memset(&fst, '\0', sizeof(struct stat));
 	
-	usbmuxd_log(LL_WARNING, "userprefdir %s", userprefdir);
+	usbmuxd_log(LL_INFO, "userprefdir %s", userprefdir);
 	
 	if (stat(userprefdir, &fst) < 0) {
 		if (mkdir(userprefdir, 0775) < 0) {
